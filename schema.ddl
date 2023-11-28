@@ -31,65 +31,55 @@ DROP SCHEMA IF EXISTS recording CASCADE;
 CREATE SCHEMA recording;
 SET search_path TO recording;
 
--- Table for Studios
-CREATE TABLE Studios (
-    studio_id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    address TEXT NOT NULL,
-    manager_id INTEGER,
-    FOREIGN KEY (manager_id) REFERENCES People(person_id)
-);
 
--- Table for People (including managers, engineers, and band members)
+-- Table for People
 CREATE TABLE People (
-    person_id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    phone VARCHAR(255) NOT NULL,
+    person_id integer PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
     certification TEXT
-);
-
--- Table for Recording Engineers
-CREATE TABLE Engineers (
-    engineer_id INTEGER PRIMARY KEY,
-    person_id INTEGER NOT NULL,
-    FOREIGN KEY (person_id) REFERENCES People(person_id)
 );
 
 -- Table for Bands
 CREATE TABLE Bands (
-    band_id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+    band_id integer PRIMARY KEY,
+    name VARCHAR(80) NOT NULL
+);
+
+-- Table for Studios
+CREATE TABLE Studios (
+    studio_id integer PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
+    address TEXT NOT NULL,
+    manager_id integer,
+    FOREIGN KEY (manager_id) REFERENCES recording.People(person_id) ON DELETE CASCADE
+);
+
+
+-- Table for Recording Engineers
+CREATE TABLE Engineers (
+    engineer_id integer PRIMARY KEY,
+    person_id integer NOT NULL,
+    FOREIGN KEY (person_id) REFERENCES recording.People(person_id) ON DELETE CASCADE
+);
+
+
+-- Table for Recording Sessions
+CREATE TABLE Sessions (
+    session_id integer PRIMARY KEY,
+    studio_id integer NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    fee NUMERIC NOT NULL,
+    FOREIGN KEY (studio_id) REFERENCES recording.Studios(studio_id) ON DELETE CASCADE
 );
 
 -- Table for Band Members
 CREATE TABLE BandMembers (
     band_id INTEGER NOT NULL,
     person_id INTEGER NOT NULL,
-    FOREIGN KEY (band_id) REFERENCES Bands(band_id),
-    FOREIGN KEY (person_id) REFERENCES People(person_id),
+    FOREIGN KEY (band_id) REFERENCES recording.Bands(band_id) ON DELETE CASCADE, 
+    FOREIGN KEY (person_id) REFERENCES recording.People(person_id) ON DELETE CASCADE,
     PRIMARY KEY (band_id, person_id)
-);
-
--- Table for Recording Sessions
-CREATE TABLE Sessions (
-    session_id SERIAL PRIMARY KEY,
-    studio_id INTEGER NOT NULL,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL,
-    fee NUMERIC NOT NULL,
-    FOREIGN KEY (studio_id) REFERENCES Studios(studio_id)
-);
-
--- Table for Session Participants (Engineers, Bands, and Individuals)
-CREATE TABLE SessionParticipants (
-    session_id INTEGER NOT NULL,
-    person_id INTEGER,
-    band_id INTEGER,
-    FOREIGN KEY (session_id) REFERENCES Sessions(session_id),
-    FOREIGN KEY (person_id) REFERENCES People(person_id),
-    FOREIGN KEY (band_id) REFERENCES Bands(band_id),
-    PRIMARY KEY (session_id, person_id, band_id)
 );
 
 -- Table for Recording Segments
@@ -98,21 +88,36 @@ CREATE TABLE Segments (
     session_id INTEGER NOT NULL,
     length INTEGER NOT NULL,
     format VARCHAR(50) NOT NULL,
-    FOREIGN KEY (session_id) REFERENCES Sessions(session_id)
+    FOREIGN KEY (session_id) REFERENCES recording.Sessions(session_id) ON DELETE CASCADE
 );
 
 -- Table for Tracks
 CREATE TABLE Tracks (
-    track_id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+    track_id integer PRIMARY KEY,
+    name VARCHAR(80) NOT NULL
 );
 
 -- Table for Albums
 CREATE TABLE Albums (
-    album_id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    album_id integer PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
     release_date DATE NOT NULL
 );
+
+-- Table for Session Participants (Engineers, Bands, and Individuals)
+CREATE TABLE SessionParticipants (
+    session_id integer NOT NULL,
+    person_id integer,
+    band_id integer,
+    FOREIGN KEY (session_id) REFERENCES recording.Sessions(session_id) ON DELETE CASCADE,
+    FOREIGN KEY (person_id) REFERENCES recording.People(person_id) ON DELETE CASCADE,
+    FOREIGN KEY (band_id) REFERENCES recording.Bands(band_id) ON DELETE CASCADE,
+    PRIMARY KEY (session_id, person_id, band_id)
+);
+
+
+
+
 
 -- Table for Track Segments (to link segments to tracks)
 CREATE TABLE TrackSegments (
