@@ -2,7 +2,7 @@ WITH AlbumSessions AS (
     SELECT 
         a.album_id, 
         a.name AS album_name,
-        COUNT(DISTINCT ts.session_id) AS session_count
+        COUNT(DISTINCT sg.session_id) AS session_count
     FROM 
         Albums a
     JOIN 
@@ -40,6 +40,21 @@ PeopleInAlbum AS (
         AlbumTracks at ON ts.track_id = at.track_id
     WHERE 
         at.album_id IN (SELECT album_id FROM MaxSessionsAlbum)
+    UNION
+    SELECT 
+        DISTINCT bm.person_id
+    FROM 
+        BandMembers bm
+    JOIN 
+        SessionParticipants sp ON bm.band_id = sp.band_id
+    JOIN 
+        Segments sg ON sp.session_id = sg.session_id
+    JOIN 
+        TrackSegments ts ON sg.segment_id = ts.segment_id
+    JOIN 
+        AlbumTracks at ON ts.track_id = at.track_id
+    WHERE 
+        at.album_id IN (SELECT album_id FROM MaxSessionsAlbum)
 )
 SELECT 
     m.album_id, 
@@ -48,7 +63,7 @@ SELECT
     COUNT(p.person_id) AS unique_participant_count
 FROM 
     MaxSessionsAlbum m
-JOIN 
-    PeopleInAlbum p ON m.album_id = p.album_id
+LEFT JOIN 
+    PeopleInAlbum p ON m.album_id = (SELECT album_id FROM MaxSessionsAlbum WHERE album_id = m.album_id)
 GROUP BY 
     m.album_id, m.album_name, m.session_count;

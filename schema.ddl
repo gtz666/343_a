@@ -112,7 +112,7 @@ CREATE TABLE SessionParticipants (
     FOREIGN KEY (session_id) REFERENCES recording.Sessions(session_id) ON DELETE CASCADE,
     FOREIGN KEY (person_id) REFERENCES recording.People(person_id) ON DELETE CASCADE,
     FOREIGN KEY (band_id) REFERENCES recording.Bands(band_id) ON DELETE CASCADE,
-    PRIMARY KEY (session_id, person_id, band_id)
+    Unique (session_id, person_id, band_id)
 );
 
 
