@@ -1,6 +1,6 @@
 -- Insert data for People
 -- Managers, Recording Engineers, Band Members
-INSERT INTO People (person_id, name, email, phone, certification) VALUES 
+INSERT INTO People (person_id, name, certification) VALUES 
 (1233, 'Donna Meagle', NULL),
 (1234, 'Tom Haverford', NULL),
 (1231, 'April Ludgate', NULL),
